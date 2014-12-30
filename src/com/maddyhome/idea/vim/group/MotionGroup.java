@@ -395,7 +395,10 @@ public class MotionGroup {
       }
       final int line = mark.getLogicalLine();
       if (!vf.getPath().equals(mark.getFilename())) {
-        final Editor selectedEditor = selectEditor(editor, vf);
+        //Lilx，取得新文件的 VirtualFile，而不是沿用旧的 vf
+        VirtualFile newFile = LocalFileSystem.getInstance().findFileByPath(mark.getFilename());
+
+        final Editor selectedEditor = selectEditor(editor, newFile);
         if (selectedEditor != null) {
           moveCaret(selectedEditor, moveCaretToLineStartSkipLeading(selectedEditor, line));
         }
@@ -423,6 +426,10 @@ public class MotionGroup {
 
   public int moveCaretToMark(@NotNull final Editor editor, char ch) {
     final Mark mark = VimPlugin.getMark().getMark(editor, ch);
+    //System.out.println("moveCaretToMark, ch = '" + ch + "'");
+    //System.out.println("mark file = " + mark.getFilename() + ", editor = " + EditorData.getVirtualFile(editor).getCanonicalPath());
+    //System.out.println("mark line = " + mark.getLogicalLine());
+
     if (mark != null) {
       final VirtualFile vf = EditorData.getVirtualFile(editor);
       if (vf == null) {
@@ -430,7 +437,12 @@ public class MotionGroup {
       }
       final LogicalPosition lp = new LogicalPosition(mark.getLogicalLine(), mark.getCol());
       if (!vf.getPath().equals(mark.getFilename())) {
-        final Editor selectedEditor = selectEditor(editor, vf);
+        //Lilx，取得新文件的 VirtualFile，而不是沿用旧的 vf
+        VirtualFile newFile = LocalFileSystem.getInstance().findFileByPath(mark.getFilename());
+        //System.out.println("new file = " + newFile);
+
+        final Editor selectedEditor = selectEditor(editor, newFile);
+
         if (selectedEditor != null) {
           moveCaret(selectedEditor, selectedEditor.logicalPositionToOffset(lp));
         }

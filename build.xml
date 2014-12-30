@@ -92,7 +92,7 @@
     <jar basedir="${classes}" jarfile="${build}/IdeaVim.jar" compress="yes"/>
   </target>
 
-  <target name="build" depends="unzip, clean, compile, jar" description="Compiles all source code and created plugin jar file"/>
+  <target name="build" depends="clean, compile, jar" description="Compiles all source code and created plugin jar file"/>
 
   <!-- Download IntelliJ IDEA distribution -->
   <target name="download" description="Downloads IntelliJ IDEA artifacts">

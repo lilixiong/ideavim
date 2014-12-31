@@ -18,6 +18,7 @@
 
 package com.maddyhome.idea.vim.helper;
 
+import com.intellij.codeInsight.navigation.MethodUpDownUtil;
 import com.intellij.ide.structureView.StructureViewBuilder;
 import com.intellij.ide.structureView.StructureViewModel;
 import com.intellij.ide.structureView.TreeBasedStructureViewBuilder;
@@ -25,6 +26,8 @@ import com.intellij.ide.structureView.impl.common.PsiTreeElementBase;
 import com.intellij.ide.util.treeView.smartTree.TreeElement;
 import com.intellij.lang.LanguageStructureViewBuilder;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.ScrollType;
+import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
@@ -49,36 +52,35 @@ public class PsiHelper {
     if (file == null) {
       return -1;
     }
-    StructureViewBuilder structureViewBuilder = LanguageStructureViewBuilder.INSTANCE.getStructureViewBuilder(file);
-    if (!(structureViewBuilder instanceof TreeBasedStructureViewBuilder)) return -1;
-    TreeBasedStructureViewBuilder builder = (TreeBasedStructureViewBuilder)structureViewBuilder;
-    StructureViewModel model = builder.createStructureViewModel();
 
-    TIntArrayList navigationOffsets = new TIntArrayList();
-    addNavigationElements(model.getRoot(), navigationOffsets, isStart);
-    navigationOffsets.sort();
+    //Lilx
+    //IDEA14不再支持 builder.createStructureViewModel() 了，如果调用 builder.createStructureViewModel() 将直接抛出异常
+    //StructureViewBuilder structureViewBuilder = LanguageStructureViewBuilder.INSTANCE.getStructureViewBuilder(file);
+    //if (!(structureViewBuilder instanceof TreeBasedStructureViewBuilder)) return -1;
+    //TreeBasedStructureViewBuilder builder = (TreeBasedStructureViewBuilder)structureViewBuilder;
+    //StructureViewModel model = builder.createStructureViewModel();
 
-    int index = navigationOffsets.size();
-    for (int i = 0; i < navigationOffsets.size(); i++) {
-      if (navigationOffsets.get(i) > offset) {
-        index = i;
-        if (count > 0) count--;
-        break;
+    // Lilx
+    // 暂时不支持 goto method end
+    int[] offsets = MethodUpDownUtil.getNavigationOffsets(file, offset);
+    for(int i = offsets.length - 1; i >= 0; i--){
+      int ioffset = offsets[i];
+      if (ioffset < offset){
+          //Lilx
+          // count = -1 表示向前跳，1 表示向后跳
+          int resultIndex = i + ((count == -1) ? 0 : 1);
+          if (resultIndex < 0) resultIndex = 0;
+          if (resultIndex >= offsets.length) resultIndex = offsets.length - 1;
+          return offsets[resultIndex];
       }
-      else if (navigationOffsets.get(i) == offset) {
-        index = i;
-        break;
+      else if (ioffset == offset && count == 1) {
+        if (i + 1 < offsets.length)
+          return offsets[i + 1];
+        else
+          return offsets[i];
       }
     }
-    int resultIndex = index + count;
-    if (resultIndex < 0) {
-      resultIndex = 0;
-    }
-    else if (resultIndex >= navigationOffsets.size()) {
-      resultIndex = navigationOffsets.size() - 1;
-    }
-
-    return navigationOffsets.get(resultIndex);
+    return -1;
   }
 
   private static void addNavigationElements(@NotNull TreeElement root, @NotNull TIntArrayList navigationOffsets, boolean start) {

@@ -426,10 +426,6 @@ public class MotionGroup {
 
   public int moveCaretToMark(@NotNull final Editor editor, char ch) {
     final Mark mark = VimPlugin.getMark().getMark(editor, ch);
-    //System.out.println("moveCaretToMark, ch = '" + ch + "'");
-    //System.out.println("mark file = " + mark.getFilename() + ", editor = " + EditorData.getVirtualFile(editor).getCanonicalPath());
-    //System.out.println("mark line = " + mark.getLogicalLine());
-
     if (mark != null) {
       final VirtualFile vf = EditorData.getVirtualFile(editor);
       if (vf == null) {

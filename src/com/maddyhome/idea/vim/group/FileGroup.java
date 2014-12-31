@@ -284,8 +284,6 @@ public class FileGroup {
   public Editor selectEditor(Project project, @NotNull VirtualFile file) {
     FileEditorManager fMgr = FileEditorManager.getInstance(project);
     FileEditor[] feditors = fMgr.openFile(file, true);
-    //System.out.println("project = " + project + ", file = " + file);
-    //System.out.println("feditors.length = " + feditors.length);
 
     if (feditors.length > 0) {
       if (feditors[0] instanceof TextEditor) {
